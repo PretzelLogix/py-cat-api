@@ -52,3 +52,22 @@ class Breed:
         self.alt_names = alt_names
         self.wikipedia_url = wikipedia_url
         self.__dict__.update(kwargs)
+
+
+class ImageShort:
+    def __init__(self, id: int, url: str, categories: List[Category] = None, breeds: List[Breed] = None, **kwargs):
+        self.id = id
+        self.url = url
+        self.categories = [] if not categories else [Category(**c) for c in categories]
+        self.breeds = [] if not breeds else [Breed(**b) for b in breeds]
+        self.__dict__.update(kwargs)
+
+
+class ImageFull(ImageShort):
+    def __init__(self, id: int, url: str, sub_id: int = 0, created_at: str = '', original_filename: str = '',
+                 categories: List[Category] = None, breeds: List[Breed] = None, **kwargs):
+        super().__init__(id, url, categories, breeds, **kwargs)
+        self.sub_id = sub_id
+        self.created_at = created_at
+        self.original_filename = original_filename
+        self.__dict__.update(kwargs)

@@ -1,5 +1,6 @@
 import requests
 from typing import List, Dict
+from the_cat_api.exceptions import TheCatApiException
 
 
 class RestAdapter:
@@ -14,7 +15,10 @@ class RestAdapter:
     def _do(self, http_method: str, endpoint: str, ep_params: Dict = None, data: Dict = None):
         full_url = self.url + endpoint
         headers = {'x-api-key': self._api_key}
-        response = requests.request(method=http_method, url=full_url, verify=self._ssl_verify, headers=headers, params=ep_params, json=data)
+        try:
+            response = requests.request(method=http_method, url=full_url, verify=self._ssl_verify, headers=headers, params=ep_params, json=data)
+        except requests.exceptions.RequestException as e:
+            raise TheCatApiException(str(e)) from e
         data_out = response.json()
         if response.status_code >= 200 and response.status_code <= 299:     # 200 to 299 is OK
             return data_out

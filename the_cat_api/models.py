@@ -1,4 +1,6 @@
+import os
 from typing import List, Dict, Union
+from the_cat_api.exceptions import TheCatApiException
 
 
 class Result:
@@ -55,12 +57,25 @@ class Breed:
 
 
 class ImageShort:
-    def __init__(self, id: int, url: str, categories: List[Category] = None, breeds: List[Breed] = None, **kwargs):
+    def __init__(self, id: int, url: str, categories: List[Category] = None, breeds: List[Breed] = None, data: bytes = bytes(), **kwargs):
         self.id = id
         self.url = url
         self.categories = [] if not categories else [Category(**c) for c in categories]
         self.breeds = [] if not breeds else [Breed(**b) for b in breeds]
+        self.data = data
         self.__dict__.update(kwargs)
+
+    def save_to(self, path: str = './', file_name: str = ''):
+        if not self.data:
+            raise TheCatApiException("No data to save")
+        try:
+            save_file_name = file_name if file_name else self.url.split('/')[-1]
+            save_path = os.path.join(path, save_file_name)
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            with open(save_path, "wb") as f:
+                f.write(self.data)
+        except Exception as e:
+            raise TheCatApiException(str(e)) from e
 
 
 class ImageFull(ImageShort):

@@ -4,7 +4,7 @@ from typing import List, Dict
 
 class RestAdapter:
     def __init__(self, hostname: str, api_key: str = '', ver: str = 'v1', ssl_verify: bool = True):
-        self.url = "https://{}/{}/".format(hostname, ver)
+        self.url = f"https://{hostname}/{ver}/"
         self._api_key = api_key
         self._ssl_verify = ssl_verify
         if not ssl_verify:

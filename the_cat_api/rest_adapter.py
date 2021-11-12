@@ -19,23 +19,27 @@ class RestAdapter:
     def _do(self, http_method: str, endpoint: str, ep_params: Dict = None, data: Dict = None) -> Result:
         full_url = self.url + endpoint
         headers = {'x-api-key': self._api_key}
+        log_line_pre = f"method={http_method}, url={full_url}, params={ep_params}"
+        log_line_post = ', '.join((log_line_pre, "success={}, status_code={}, message={}"))
         try:
-            log_line = f"method={http_method}, url={full_url}, params={ep_params}"
-            self._logger.debug(msg=log_line)
-            response = requests.request(method=http_method, url=full_url, verify=self._ssl_verify, headers=headers, params=ep_params, json=data)
+            self._logger.debug(msg=log_line_pre)
+            response = requests.request(method=http_method, url=full_url, verify=self._ssl_verify,
+                                        headers=headers, params=ep_params, json=data)
         except requests.exceptions.RequestException as e:
             self._logger.error(msg=(str(e)))
-            raise TheCatApiException(str(e)) from e
+            raise TheCatApiException("Request failed") from e
         try:
             data_out = response.json()
         except (ValueError, JSONDecodeError) as e:
-            log_line = f"success=False, status_code={response.status_code}, message={e}"
-            self._logger.warning(msg=log_line)
-            return Result(False, response.status_code, message=str(e))
-        is_success = 299 >= response.status_code >= 200
-        log_line = f"success={is_success}, status_code={response.status_code}, message={response.reason}"
-        self._logger.debug(msg=log_line)
-        return Result(is_success, response.status_code, message=response.reason, data=data_out)
+            self._logger.error(msg=log_line_post.format(False, None, e))
+            raise TheCatApiException("Bad JSON in response") from e
+        is_success = 299 >= response.status_code >= 200     # 200 to 299 is OK
+        log_line = log_line_post.format(is_success, response.status_code, response.reason)
+        if is_success:
+            self._logger.debug(msg=log_line)
+            return Result(response.status_code, message=response.reason, data=data_out)
+        self._logger.error(msg=log_line)
+        raise TheCatApiException(f"{response.status_code}: {response.reason}")
 
     def get(self, endpoint: str, ep_params: Dict = None) -> Result:
         return self._do(http_method='GET', endpoint=endpoint, ep_params=ep_params)

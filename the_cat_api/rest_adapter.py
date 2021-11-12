@@ -1,6 +1,8 @@
 import requests
-from typing import List, Dict
+from typing import Dict
+from json import JSONDecodeError
 from the_cat_api.exceptions import TheCatApiException
+from the_cat_api.models import Result
 
 
 class RestAdapter:
@@ -20,16 +22,19 @@ class RestAdapter:
                                         headers=headers, params=ep_params, json=data)
         except requests.exceptions.RequestException as e:
             raise TheCatApiException("Request failed") from e
-        data_out = response.json()
-        if response.status_code >= 200 and response.status_code <= 299:     # 200 to 299 is OK
-            return data_out
-        raise Exception(data_out["message"])
+        try:
+            data_out = response.json()
+        except (ValueError, JSONDecodeError) as e:
+            raise TheCatApiException("Bad JSON in response") from e
+        if 299 >= response.status_code >= 200:     # 200 to 299 is OK
+            return Result(response.status_code, message=response.reason, data=data_out)
+        raise TheCatApiException(f"{response.status_code}: {response.reason}")
 
-    def get(self, endpoint: str, ep_params: Dict = None) -> List[Dict]:
+    def get(self, endpoint: str, ep_params: Dict = None) -> Result:
         return self._do(http_method='GET', endpoint=endpoint, ep_params=ep_params)
 
-    def post(self, endpoint: str, ep_params: Dict = None, data: Dict = None) -> List[Dict]:
+    def post(self, endpoint: str, ep_params: Dict = None, data: Dict = None) -> Result:
         return self._do(http_method='POST', endpoint=endpoint, ep_params=ep_params, data=data)
 
-    def delete(self, endpoint: str, ep_params: Dict = None, data: Dict = None) -> List[Dict]:
+    def delete(self, endpoint: str, ep_params: Dict = None, data: Dict = None) -> Result:
         return self._do(http_method='DELETE', endpoint=endpoint, ep_params=ep_params, data=data)

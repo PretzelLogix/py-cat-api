@@ -1,8 +1,6 @@
 import requests
 from typing import List, Dict
-from json import JSONDecodeError
 from the_cat_api.exceptions import TheCatApiException
-from the_cat_api.models import Result
 
 
 class RestAdapter:

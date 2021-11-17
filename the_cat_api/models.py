@@ -12,3 +12,11 @@ class Result:
         self.status_code = int(status_code)
         self.message = str(message)
         self.data = data if data else []
+
+
+class Fact:
+    def __init__(self, id: str, text: str, language_code: str, breed_id: str):
+        self.id = id
+        self.text = text
+        self.language_code = language_code
+        self.breed_id = breed_id

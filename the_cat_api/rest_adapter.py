@@ -17,7 +17,7 @@ class RestAdapter:
         :param logger: (optional) If your app has a logger, pass it in here.
         """
         self._logger = logger or logging.getLogger(__name__)
-        self.url = f"https://{hostname}/{ver}/"
+        self.url = f"https://{hostname}/{ver}"
         self._api_key = api_key
         self._ssl_verify = ssl_verify
         if not ssl_verify:

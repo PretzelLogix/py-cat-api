@@ -9,6 +9,12 @@ class TheCatApi:
         self._rest_adapter = RestAdapter(hostname, api_key, ver, ssl_verify, logger)
 
     def get_kitty(self) -> ImageShort:
-        result = self._rest_adapter.get(endpoint='/images/search')
-        kitty_img = ImageShort(**result.data[0])
-        return kitty_img
+        return self.get_clowder_of_kitties(amt=1)[0]
+
+    def get_clowder_of_kitties(self, amt: int = 1) -> List[ImageShort]:
+        result = self._rest_adapter.get(endpoint=f'/images/search?limit={amt}')
+        kitty_img_list = [ImageShort(**datum) for datum in result.data]
+        return kitty_img_list
+
+    def fetch_image_data(self, image: ImageShort):
+        image.data = self._rest_adapter.fetch_data(url=image.url)

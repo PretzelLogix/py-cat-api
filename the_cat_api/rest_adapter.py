@@ -59,7 +59,7 @@ class RestAdapter:
         log_line = log_line_post.format(is_success, response.status_code, response.reason)
         if is_success:
             self._logger.debug(msg=log_line)
-            return Result(response.status_code, message=response.reason, data=data_out)
+            return Result(response.status_code, headers=response.headers, message=response.reason, data=data_out)
         self._logger.error(msg=log_line)
         raise TheCatApiException(f"{response.status_code}: {response.reason}")
 

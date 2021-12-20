@@ -1,10 +1,13 @@
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, TypeVar
+from requests.structures import CaseInsensitiveDict
 from the_cat_api.exceptions import TheCatApiException
+
+Model = TypeVar('Model', covariant=True)
 
 
 class Result:
-    def __init__(self, status_code: int, message: str = '', data: List[Dict] = None):
+    def __init__(self, status_code: int, headers: CaseInsensitiveDict, message: str = '', data: List[Dict] = None):
         """
         Result returned from low-level RestAdapter
         :param status_code: Standard HTTP Status code
@@ -12,6 +15,7 @@ class Result:
         :param data: Python List of Dictionaries (or maybe just a single Dictionary on error)
         """
         self.status_code = int(status_code)
+        self.headers = headers
         self.message = str(message)
         self.data = data if data else []
 

@@ -50,7 +50,7 @@ class RestAdapter:
         # Deserialize JSON output to Python object, or return failed Result on exception
         try:
             data_out = response.json()
-        except (ValueError, JSONDecodeError) as e:
+        except (ValueError, TypeError, JSONDecodeError) as e:
             self._logger.error(msg=log_line_post.format(False, None, e))
             raise TheCatApiException("Bad JSON in response") from e
 
@@ -59,7 +59,7 @@ class RestAdapter:
         log_line = log_line_post.format(is_success, response.status_code, response.reason)
         if is_success:
             self._logger.debug(msg=log_line)
-            return Result(response.status_code, message=response.reason, data=data_out)
+            return Result(response.status_code, headers=response.headers, message=response.reason, data=data_out)
         self._logger.error(msg=log_line)
         raise TheCatApiException(f"{response.status_code}: {response.reason}")
 

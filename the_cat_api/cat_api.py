@@ -24,12 +24,12 @@ class TheCatApi:
 
     def _page(self, endpoint: str, model: Callable[..., Model], max_amt: int = 100) -> Iterator[Model]:
         amt_yielded = 0
-        curr_page = last_page = 1
+        curr_page = last_page = 0
         ep_params = {'limit': self._page_size, 'order': 'Desc'}
         while curr_page <= last_page:
             ep_params['page'] = curr_page
             result = self._rest_adapter.get(endpoint=endpoint, ep_params=ep_params)
-            last_page = int(result.headers.get('pagination-count', 1))
+            last_page = int(result.headers.get('pagination-count', 0))
             curr_page = int(result.headers.get('pagination-page')) + 1
             for datum in result.data:
                 yield model(**datum)
